@@ -1,0 +1,40 @@
+type Person @table {
+	id: ID @primaryKey # Here we define primary key (must be one)
+	name: String
+	birth_year: number
+	death_year: number
+}
+
+type Book @table @export {
+	id: ID @primaryKey # Here we define primary key (must be one)
+	title: String # we can define any other attributes here
+	subjects: [String]
+	authors: [Person]
+	summaries: [String]
+	translators: [Person]
+	bookshelves: [String]
+	languages: [String]
+	copyright: Boolean
+	media_type: String
+	download_count: Int
+}
+
+type GutenBookResult @table @export {
+	id: ID @primaryKey # Here we define primary key (must be one)
+	count: Int
+	next: String #url for the next page of 0-32 books
+	previous: String #url for the previous page
+	results: [Book]
+}
+
+type BookCache @table(expiration: 3600) @export {
+	id: ID @primaryKey
+	content: String
+}
+
+type FavoriteBook @table(expiration: 3600) @export {
+	id: ID @primaryKey
+	title: String # we can define any other attributes here
+	subjects: [String]
+	authors: [Person]
+}

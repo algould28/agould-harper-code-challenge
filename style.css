@@ -1,0 +1,21 @@
+body {
+	margin: 0;
+	height: 100vh;
+	width: 100vw;
+}
+
+.root {
+	height: fit-content;
+	min-height: 100vh;
+	width: inherit;
+	background: linear-gradient(45deg, #312556, #403b8a, #7a3a87) !important;
+}
+
+.heart-icon {
+	color: #666;
+}
+
+.heart-icon.active {
+	color: red;
+	fill: red;
+}
