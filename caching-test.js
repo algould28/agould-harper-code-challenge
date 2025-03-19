@@ -1,17 +1,17 @@
 import assert from 'node:assert';
 
-const blog_url = new URL('http://localhost:9926/CachedBlog/0');
-const post_url = new URL('http://localhost:9926/Post/0');
+const book_url = new URL('http://localhost:9926/CachedBookResult/0');
+const favoriteId = '51515151481451781515';
 
 // Step 1. Request the Page so it gets SSR'd
-const r1 = await fetch(blog_url);
+const r1 = await fetch(book_url);
 
 // Retrieve the cache headers
 let etag = r1.headers.get('ETag');
 let last_modified = r1.headers.get('Last-Modified');
 
 // Step 2. Load the Page a second time using the respective cache headers
-const r2 = await fetch(blog_url, {
+const r2 = await fetch(book_url, {
 	headers: {
 		'If-None-Match': etag,
 		'If-Modified-Since': last_modified,
@@ -20,41 +20,70 @@ const r2 = await fetch(blog_url, {
 // And assert we get a cache hit (304)
 assert(r2.status === 304, `Expected 304 status code, got ${r2.status}`);
 
-// Step 3. Update the Post
-const post = await (await fetch(post_url)).json();
-const r3 = await fetch(post_url, {
-	method: 'PATCH',
+// test adding a favorite
+const r3 = await fetch('http://localhost:9926/AddFavorite', {
+	method: 'POST',
 	headers: {
 		'Content-Type': 'application/json',
 	},
 	body: JSON.stringify({
-		comments: post.comments.concat(`Random Comment ${Math.random()}`),
+		bookId: favoriteId,
+		title: 'Testing Book',
+		authors: [],
+		subjects: [],
 	}),
-});
-// Assert this doesn't fail
-assert(r3.ok, `Expected successful response, got ${r3.status}`);
+})
+	.then((response) => {
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+		return 'ok';
+	})
+	.catch((error) => {
+		return error;
+	});
 
-// Step 4. Load the Page a third time using the respective cache headers
-const r4 = await fetch(blog_url, {
+assert(r3 === 'ok', `Exepected Adding a Favorite to return "ok", got: ${r3}`);
+
+// test getting a favorite
+const r4 = await fetch(`http://localhost:9926/FavoriteBook/${favoriteId}`, {
+	method: 'GET',
 	headers: {
-		'If-None-Match': etag,
-		'If-Modified-Since': last_modified,
+		'Content-Type': 'application/json',
 	},
-});
-// But we should get a 200 since the Post changed
-assert(r4.status === 200, `Expected 200 status code, got ${r4.status}`);
+})
+	.then(async (response) => {
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
 
-// Update the cache headers
-etag = r4.headers.get('ETag');
-last_modified = r4.headers.get('Last-Modified');
+		const jsonRes = await response.json();
+		return jsonRes.id;
+	})
+	.catch((error) => {
+		return error;
+	});
 
-// Step 5. Load the Page a fourth time using the respective cache headers
-const r5 = await fetch(blog_url, {
+assert(r4 === favoriteId, `Exepected Getting a Favorite to return the favorite json, got: ${r4}`);
+
+// test removing a favorite
+const r5 = await fetch('http://localhost:9926/RemoveFavorite', {
+	method: 'POST',
 	headers: {
-		'If-None-Match': etag,
-		'If-Modified-Since': last_modified,
+		'Content-Type': 'application/json',
 	},
-});
+	body: JSON.stringify({
+		bookId: favoriteId,
+	}),
+})
+	.then((response) => {
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+		return 'ok';
+	})
+	.catch((error) => {
+		return error;
+	});
 
-// And finally assert we get a cache hit (304)
-assert(r5.status === 304, `Expected 304 status code, got ${r5.status}`);
+assert(r5 === 'ok', `Exepected Removing a Favorite to return "ok", got: ${r5}`);
