@@ -17,6 +17,7 @@ async function renderBookResult(bookResult) {
 	return html;
 }
 
+//external resource integration
 export class GutenBookSource extends Resource {
 	async get() {
 		const id = this.getId();
@@ -65,6 +66,7 @@ export class CachedBookResult extends tables.BookCache {
 	}
 }
 
+//REST endpoint example
 export class AddFavorite extends tables.FavoriteBook {
 	async post(data) {
 		console.log('ADD FAVORITE');

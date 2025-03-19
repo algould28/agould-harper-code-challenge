@@ -8,6 +8,7 @@ export default function Book({ initialBookData }) {
 	const [loading, setLoading] = useState(true);
 	const [showFavorites, setShowFavorites] = useState(false);
 
+	// WS integration example
 	useEffect(async () => {
 		const ws = new WebSocket(`ws://localhost:9926/GutenBookResult/${bookData.id}`);
 		ws.onmessage = (event) => {
@@ -75,6 +76,7 @@ export default function Book({ initialBookData }) {
 					}}
 					onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#55c58fBB')}
 					onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#55c58f')}
+					disabled={loading}
 					onClick={toggleFavoritesView}
 				>
 					{showFavorites ? 'Show Books' : 'Show Favorites'}
