@@ -38,9 +38,45 @@ export default function Book({ initialBookData }) {
 		if (favoritesResponse.ok) setFavorites(await favoritesResponse.json());
 	}, [favorites, setFavorites]);
 
+	const toggleFavoritesView = useCallback(() => {
+		setShowFavorites(!showFavorites);
+	}, [showFavorites, setShowFavorites]);
+
+	const toggleLoading = useCallback(() => {
+		setLoading(!loading);
+	}, [loading, setLoading]);
+
 	return (
 		<article style={{ padding: '1rem 2rem' }}>
-			<div style={{ color: '#FDFDFD', fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>Book Results</div>
+			<div
+				style={{
+					display: 'flex',
+					justifyContent: 'space-between',
+					alignItems: 'center',
+					width: '100%',
+				}}
+			>
+				<div style={{ color: '#FDFDFD', fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+					Book Results
+				</div>
+				<button
+					style={{
+						padding: '0.5rem 1rem',
+						borderRadius: '4px',
+						border: 'none',
+						backgroundColor: '#55c58f',
+						color: '#FDFDFD',
+						cursor: 'pointer',
+						transition: 'background-color 0.2s ease',
+					}}
+					onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#55c58fBB')}
+					onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#55c58f')}
+					onClick={toggleFavoritesView}
+				>
+					{showFavorites ? 'Show Books' : 'Show Favorites'}
+				</button>
+			</div>
+
 			{!loading && favorites != null && bookData != null ? (
 				<div
 					style={{
@@ -55,7 +91,7 @@ export default function Book({ initialBookData }) {
 					}}
 				>
 					{showFavorites
-						? favorites.results.map((favorite) => {
+						? favorites.map((favorite) => {
 								return <BookCard book={favorite} isFavorite={true} updateFavorites={updateFavorites} />;
 							})
 						: bookData.results.map((book) => {
