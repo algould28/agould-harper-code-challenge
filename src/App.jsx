@@ -1,25 +1,38 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import BookCard from './BookCard';
 import Pagination from './Pagination';
 
 export default function Book({ initialBookData }) {
 	const [bookData, setBookData] = useState(initialBookData);
+	const [favorites, setFavorites] = useState(undefined);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(async () => {
-		console.log('initial book data');
-		console.log(initialBookData);
 		const ws = new WebSocket(`ws://localhost:9926/GutenBookResult/${bookData.id}`);
 		ws.onmessage = (event) => {
-			console.log('WEBSOCKET EVENT');
 			const message = JSON.parse(event.data);
-			console.log(message);
 			setBookData(message.value);
 		};
+
+		await updateFavorites();
 
 		return () => {
 			ws.close();
 		};
 	}, []);
+
+	useEffect(() => {
+		if (favorites != null && bookData != null) {
+			setLoading(false);
+		}
+	}, [favorites, bookData]);
+
+	const updateFavorites = useCallback(async () => {
+		console.log('UPDATE FAVS');
+		const favoritesResponse = await fetch('http://localhost:9926/GetFavorites/');
+
+		if (favoritesResponse.ok) setFavorites(await favoritesResponse.json());
+	}, [favorites, setFavorites]);
 
 	return (
 		<article style={{ padding: '1rem 2rem' }}>
@@ -36,9 +49,14 @@ export default function Book({ initialBookData }) {
 					padding: '0.5rem',
 				}}
 			>
-				{bookData.results.map((book) => {
-					return <BookCard book={book} />;
-				})}
+				{!loading && favorites != null && bookData != null ? (
+					bookData.results.map((book) => {
+						const isFavorite = favorites.some((favoriteData) => `${book.id}` === `${favoriteData.id}`);
+						return <BookCard book={book} isFavorite={isFavorite} updateFavorites={updateFavorites} />;
+					})
+				) : (
+					<div>loading</div>
+				)}
 			</div>
 
 			<Pagination bookData={bookData} />

@@ -1,9 +1,5 @@
-import { useState } from 'react';
-
-export default function BookCard({ book }) {
-	const [isFavorite, setIsFavorite] = useState(false);
-
-	const addFavorite = (book) => {
+export default function BookCard({ book, isFavorite, updateFavorites }) {
+	const addFavorite = async (book) => {
 		const url = `${window.location.protocol}//${window.location.host}/AddFavorite`;
 		const data = {
 			bookId: book.id,
@@ -12,19 +8,19 @@ export default function BookCard({ book }) {
 			subjects: book.subjects,
 		};
 
-		makeFavoriteAPICall(url, data);
+		await makeFavoriteAPICall(url, data);
 	};
 
-	const removeFavorite = (book) => {
+	const removeFavorite = async (book) => {
 		const url = `${window.location.protocol}//${window.location.host}/RemoveFavorite`;
 		const data = {
 			bookId: book.id,
 		};
 
-		makeFavoriteAPICall(url, data);
+		await makeFavoriteAPICall(url, data);
 	};
 
-	const makeFavoriteAPICall = (url, data) => {
+	const makeFavoriteAPICall = async (url, data) => {
 		const options = {
 			method: 'POST',
 			headers: {
@@ -33,12 +29,12 @@ export default function BookCard({ book }) {
 			body: JSON.stringify(data),
 		};
 
-		fetch(url, options)
+		await fetch(url, options)
 			.then((response) => {
 				if (!response.ok) {
 					throw new Error(`HTTP error! status: ${response.status}`);
 				}
-				return response.json();
+				return 'ok';
 			})
 			.then((responseData) => {
 				console.log('Success:', responseData);
@@ -81,14 +77,14 @@ export default function BookCard({ book }) {
 			}}
 		>
 			<button
-				onClick={() => {
+				onClick={async () => {
 					if (isFavorite) {
-						removeFavorite(book);
+						await removeFavorite(book);
 					} else {
-						addFavorite(book);
+						await addFavorite(book);
 					}
 
-					setIsFavorite(!isFavorite);
+					await updateFavorites();
 				}}
 				style={{
 					position: 'absolute',

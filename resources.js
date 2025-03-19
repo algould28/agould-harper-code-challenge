@@ -96,17 +96,33 @@ export class RemoveFavorite extends tables.FavoriteBook {
 	}
 }
 
-// export class GetFavorites extends tables.FavoriteBook {
-// 	async get() {
-// 		console.log('GETTING ALL FAVORITES');
-// 		try {
-// 			const favorites = await tables.FavoriteBook.get();
-// 			console.log('Favorites retrieved:');
-// 			console.log(JSON.stringify(favorites));
-// 			return JSON.stringify(favorites);
-// 		} catch (error) {
-// 			console.error('Error getting favorites:', error);
-// 			return [];
-// 		}
-// 	}
-// }
+export class GetFavorites extends tables.FavoriteBook {
+	async get() {
+		console.log('GETTING ALL FAVORITES');
+		try {
+			const options = {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			};
+
+			const favorites = await fetch(`http://localhost:9926/FavoriteBook/`, options)
+				.then(async (response) => {
+					if (!response.ok) {
+						throw new Error(`HTTP error! status: ${response.status}`);
+					}
+					return await response.json();
+				})
+				.catch((error) => {
+					console.error('Error:', error);
+					return [];
+				});
+
+			return favorites;
+		} catch (error) {
+			console.error('Error getting favorites:', error);
+			return [];
+		}
+	}
+}
