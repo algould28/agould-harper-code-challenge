@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-export default function Pagination({ bookData }) {
+export default function Pagination({ bookData, updateLoading }) {
 	const currentPage = useMemo(() => parseInt(bookData?.id), [bookData]);
 	// guten index returns results of 32 so each page will have 32 results
 	const totalPages = useMemo(() => Math.floor(parseInt(bookData?.count) / 32), [bookData]);
@@ -25,9 +25,13 @@ export default function Pagination({ bookData }) {
 					cursor: 'pointer',
 					transition: 'background-color 0.2s ease',
 				}}
+				disabled={currentPage === 0}
 				onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#504b9a')}
 				onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#403b8a')}
-				onClick={() => (window.location.href = `/CachedBookResult/${currentPage - 1}`)}
+				onClick={() => {
+					updateLoading(true);
+					window.location.href = `/CachedBookResult/${currentPage - 1}`;
+				}}
 			>
 				←
 			</button>
@@ -44,9 +48,13 @@ export default function Pagination({ bookData }) {
 					cursor: 'pointer',
 					transition: 'background-color 0.2s ease',
 				}}
+				disabled={currentPage === totalPages}
 				onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#504b9a')}
 				onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#403b8a')}
-				onClick={() => (window.location.href = `/CachedBookResult/${currentPage + 1}`)}
+				onClick={() => {
+					updateLoading(true);
+					window.location.href = `/CachedBookResult/${currentPage + 1}`;
+				}}
 			>
 				→
 			</button>

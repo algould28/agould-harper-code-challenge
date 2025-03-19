@@ -24,6 +24,7 @@ export default function Book({ initialBookData }) {
 	}, []);
 
 	useEffect(() => {
+		console.log({ favorites, bookData });
 		// only display data if everything is ready
 		if (favorites != null && bookData != null) {
 			setLoading(false);
@@ -32,7 +33,6 @@ export default function Book({ initialBookData }) {
 
 	//wanted to use a websocket here for real time updates but could not figure out how to append the consecutive streams
 	const updateFavorites = useCallback(async () => {
-		console.log('UPDATE FAVS');
 		const favoritesResponse = await fetch('http://localhost:9926/GetFavorites/');
 
 		if (favoritesResponse.ok) setFavorites(await favoritesResponse.json());
@@ -42,9 +42,13 @@ export default function Book({ initialBookData }) {
 		setShowFavorites(!showFavorites);
 	}, [showFavorites, setShowFavorites]);
 
-	const toggleLoading = useCallback(() => {
-		setLoading(!loading);
-	}, [loading, setLoading]);
+	const updateLoading = useCallback(
+		(isLoading) => {
+			console.log(bookData.id);
+			setLoading(isLoading);
+		},
+		[setLoading, bookData]
+	);
 
 	return (
 		<article style={{ padding: '1rem 2rem' }}>
@@ -117,7 +121,7 @@ export default function Book({ initialBookData }) {
 				</div>
 			)}
 
-			<Pagination bookData={bookData} />
+			{!showFavorites && <Pagination bookData={bookData} updateLoading={updateLoading} />}
 		</article>
 	);
 }
